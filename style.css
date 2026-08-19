@@ -1,5 +1,5 @@
 /* =====================================================================
-   📌 1STEP - Oyunlaştırmalı & Sesli Stiller (style.css)
+   📌 1STEP - Tam Yetkili Admin & E-posta Stilleri (style.css)
    ===================================================================== */
 
 body {
@@ -112,7 +112,36 @@ header p.slogan {
     font-weight: 900;
 }
 
-.user-bar-actions { display: flex; gap: 10px; }
+.user-bar-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ✉️ AKTİF E-POSTA BUTONU STİLLERİ */
+.btn-email-add {
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-email-add:hover {
+    background: #38bdf8;
+    color: #000000;
+}
+
+.btn-email-add.has-email {
+    background: rgba(57, 211, 83, 0.1);
+    color: #39d353;
+    border-color: rgba(57, 211, 83, 0.3);
+}
+
+.btn-email-add.has-email:hover {
+    background: #39d353;
+    color: #000000;
+}
 
 .btn-admin-panel {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
@@ -221,18 +250,73 @@ button {
     font-weight: 600;
     text-align: center;
     margin-top: 4px;
-    animation: shakeError 0.3s ease-in-out;
 }
 
-@keyframes shakeError {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-6px); }
-    40%, 80% { transform: translateX(6px); }
+.forgot-link {
+    display: block;
+    text-align: center;
+    font-size: 12px;
+    color: #38bdf8;
+    text-decoration: none;
+    margin-top: 6px;
 }
 
-.habit-error { margin-bottom: 20px; margin-top: -15px; }
+.forgot-link:hover { color: #39d353; text-decoration: underline; }
+.forgot-desc { font-size: 13px; color: #8b949e; text-align: center; line-height: 1.4; }
 
-.empty-msg { text-align: center; color: #475569; font-size: 14px; }
+.success-msg {
+    color: #39d353;
+    background: rgba(57, 211, 83, 0.12);
+    border: 1px solid rgba(57, 211, 83, 0.35);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* 👑 ADMIN PANELİ YÖNETİM KARTLARI */
+.admin-user-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-user-info { display: flex; flex-direction: column; gap: 2px; }
+.admin-user-info strong { color: #ffffff; font-size: 14px; }
+.admin-user-info small { color: #8b949e; font-size: 11px; }
+
+.admin-actions { display: flex; gap: 8px; }
+
+.btn-admin-action {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s ease;
+}
+
+.btn-admin-action:hover { transform: scale(1.05); }
+
+.btn-admin-action.btn-email {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.btn-admin-action.btn-pass {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
 
 .habit-card {
     background-color: #0d1117;
@@ -249,7 +333,6 @@ button {
 .habit-header { display: flex; justify-content: space-between; align-items: center; }
 .habit-info h3 { font-size: 17px; color: #ffffff; margin-bottom: 4px; }
 
-/* KUPA / ROZET ETİKETİ */
 .milestone-badge {
     font-size: 11px;
     background: rgba(245, 158, 11, 0.15);
@@ -301,7 +384,7 @@ button {
 .grid-square.today { outline: 1.5px solid #58a6ff; outline-offset: 1px; cursor: pointer; }
 
 .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-card { background: #0d1117; border: 1px solid #f59e0b; border-radius: 16px; width: 90%; max-width: 480px; padding: 24px; }
+.modal-card { background: #0d1117; border: 1px solid #f59e0b; border-radius: 16px; width: 90%; max-width: 520px; padding: 24px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .modal-header h3 { color: #f59e0b; font-size: 18px; }
 .btn-close-modal { background: transparent; border: none; color: #8b949e; font-size: 18px; cursor: pointer; }
@@ -309,7 +392,6 @@ button {
 .stat-box { flex: 1; background: #161b22; padding: 14px; border-radius: 10px; text-align: center; border: 1px solid #30363d; }
 .stat-num { display: block; font-size: 24px; font-weight: 900; color: #39d353; }
 .stat-label { font-size: 12px; color: #8b949e; }
-.admin-user-row { display: flex; justify-content: space-between; padding: 10px; background: #161b22; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
 
 /* LIGHT MODE SUPPORT */
 body.light-mode { background: #f1f5f9; color: #0f172a; }
@@ -318,6 +400,7 @@ body.light-mode .auth-card,
 body.light-mode .modal-card,
 body.light-mode .habit-card,
 body.light-mode .stat-card,
+body.light-mode .admin-user-card,
 body.light-mode input {
     background: #ffffff;
     border-color: #e2e8f0;
