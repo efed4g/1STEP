@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
     
     <!-- CSS Dosyası -->
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -32,6 +32,10 @@
     <div id="userBar" class="user-bar hidden">
         <div id="userBadge" class="user-badge"></div>
         <div class="user-bar-actions">
+            <!-- Aktif E-posta Ekleme / Güncelleme Butonu -->
+            <button id="emailBtn" class="btn-email-add" onclick="promptAddEmail()" title="E-posta Adresini Düzenle">
+                <i class="fa-solid fa-envelope"></i> E-posta Ekle
+            </button>
             <button id="adminPanelBtn" class="btn-admin-panel hidden" onclick="openAdminModal()">
                 <i class="fa-solid fa-crown"></i> Admin Paneli
             </button>
@@ -41,7 +45,7 @@
         </div>
     </div>
 
-    <!-- GİRİŞ / KAYIT KARTI -->
+    <!-- GİRİŞ / KAYIT / E-POSTA ŞİFRE SIFIRLAMA KARTI -->
     <div id="authSection" class="auth-section">
         <div class="auth-card">
             <div class="auth-tabs">
@@ -51,26 +55,36 @@
 
             <!-- Giriş Formu -->
             <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
-                <input type="text" id="loginUsername" placeholder="Kullanıcı Adı">
+                <input type="text" id="loginUsername" placeholder="Kullanıcı Adı veya E-posta">
                 <input type="password" id="loginPassword" placeholder="Şifre">
                 <button type="button" class="btn-auth" onclick="handleLogin(event)">Giriş Yap</button>
+                <a href="#" class="forgot-link" onclick="switchAuthTab('forgot')">🔑 Şifremi Unuttum?</a>
                 <div id="loginError" class="error-msg hidden"></div>
             </form>
 
             <!-- Kayıt Formu -->
             <form id="registerForm" class="auth-form hidden" onsubmit="handleRegister(event)">
                 <input type="text" id="regUsername" placeholder="Kullanıcı Adı Seç">
+                <input type="email" id="regEmail" placeholder="E-posta Adresiniz (Şifre Kurtarma İçin)">
                 <input type="password" id="regPassword" placeholder="Şifre Oluştur">
                 <button type="button" class="btn-auth" onclick="handleRegister(event)">Kayıt Ol</button>
                 <div id="regError" class="error-msg hidden"></div>
+            </form>
+
+            <!-- 📧 E-posta Şifre Sıfırlama Formu -->
+            <form id="forgotForm" class="auth-form hidden" onsubmit="handleFirebaseResetPassword(event)">
+                <p class="forgot-desc">Kullanıcı adınızı veya E-posta adresinizi girin. Güvenli sıfırlama bağlantısı göndereceğiz:</p>
+                <input type="text" id="forgotInput" placeholder="Kullanıcı Adınız veya E-postanız">
+                <button type="button" class="btn-auth" onclick="handleFirebaseResetPassword(event)">📧 Sıfırlama Bağlantısı Gönder</button>
+                <a href="#" class="forgot-link" onclick="switchAuthTab('login')">← Giriş Ekranına Dön</a>
+                <div id="forgotError" class="error-msg hidden"></div>
+                <div id="forgotSuccess" class="success-msg hidden"></div>
             </form>
         </div>
     </div>
 
     <!-- ANA UYGULAMA ALANI -->
     <div id="appContent" class="app-content hidden">
-        
-        <!-- 📊 İSTATİSTİK ÖZET PANELDİ -->
         <div class="stats-overview">
             <div class="stat-card">
                 <span class="stat-icon">🎯</span>
@@ -95,7 +109,6 @@
             </div>
         </div>
 
-        <!-- ALIŞKANLIK EKLEME FORMU -->
         <section>
             <input type="text" id="habitInput" placeholder="Yeni bir alışkanlık yaz... (Örn: 1 saat Kodlama)">
             <button id="addBtn">Ekle</button>
@@ -107,7 +120,7 @@
         </main>
     </div>
 
-    <!-- ADMIN PANELİ MODALI -->
+    <!-- 👑 EFE'NİN KULLANICI & ŞİFRE/E-POSTA YÖNETİM MODALI -->
     <div id="adminModal" class="modal-backdrop hidden">
         <div class="modal-card">
             <div class="modal-header">
@@ -125,20 +138,19 @@
                         <span class="stat-label">Toplam Alışkanlık</span>
                     </div>
                 </div>
-                <h4>Kullanıcı Listesi:</h4>
+                <h4>Kullanıcı Yönetimi (E-posta & Şifre Yetkileri):</h4>
                 <div id="adminUsersList" class="admin-users-list"></div>
             </div>
         </div>
     </div>
 
-    <!-- KONFETİ KÜTÜPHANESİ (CDN) -->
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- KONFETİ KÜTÜPHANESİ -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <!-- 🔥 FIREBASE SDK (Authentication + Firestore) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>
