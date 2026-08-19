@@ -2,134 +2,61 @@ const habitInput = document.getElementById('habitInput');
 const addBtn = document.getElementById('addBtn');
 const habitsList = document.getElementById('habitsList');
 
-// 👑 EFE'YE ÖZEL ADMIN BİLGİLERİ
+// 👑 ADMIN KULLANICI ADI (bu kullanıcı adıyla kayıt olan/hesap admin rozetini görür)
 const ADMIN_USERNAME = "Efehaei";
-const ADMIN_PASS_HASH = "d34c6ed01fea3982fe2459a77231aa5167d74731ec136d8c39da9607164caee3";
 
-// SAF JAVASCRIPT SHA-256 (Kütüphanesiz Şifreleme)
-function sha256Sync(ascii) {
-    function rightRotate(value, amount) {
-        return (value >>> amount) | (value << (32 - amount));
-    }
-    var mathPow = Math.pow;
-    var maxWord = mathPow(2, 32);
-    var i, j, result = '';
-    var words = [];
-    var asciiBitLength = ascii.length * 8;
-    var hash = sha256Sync.h = sha256Sync.h || [];
-    var k = sha256Sync.k = sha256Sync.k || [];
-    var primeCounter = k.length;
+// 🔥 FIREBASE YAPILANDIRMASI
+const firebaseConfig = {
+    apiKey: "AIzaSyDWCo4uxYnBzZE2GrySIyPpG01yvts9AyQ",
+    authDomain: "step-35a2b.firebaseapp.com",
+    projectId: "step-35a2b",
+    storageBucket: "step-35a2b.firebasestorage.app",
+    messagingSenderId: "759360554165",
+    appId: "1:759360554165:web:cb4ff313d75e43b97d6afc",
+    measurementId: "G-Y1HTMZMJBZ"
+};
 
-    var isComposite = {};
-    for (var candidate = 2; primeCounter < 64; candidate++) {
-        if (!isComposite[candidate]) {
-            for (i = 0; i < 300; i += candidate) {
-                isComposite[i] = candidate;
-            }
-            hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
-            k[primeCounter++] = (mathPow(candidate, 1/3) * maxWord) | 0;
-        }
-    }
-    
-    ascii += '\x80';
-    while (ascii.length % 64 - 56) ascii += '\x00';
-    for (i = 0; i < ascii.length; i++) {
-        j = ascii.charCodeAt(i);
-        if (j >> 8) return;
-        words[i >> 2] |= j << ((3 - i % 4) * 8);
-    }
-    words[words.length] = ((asciiBitLength / maxWord) | 0);
-    words[words.length] = (asciiBitLength);
-    
-    for (j = 0; j < words.length;) {
-        var w = words.slice(j, j += 16);
-        var oldHash = hash;
-        hash = hash.slice(0, 8);
-        
-        for (i = 0; i < 64; i++) {
-            var i2 = i + j;
-            var w15 = w[i - 15], w2 = w[i - 2];
-            var a = hash[0], e = hash[4];
-            var temp1 = hash[7]
-                + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
-                + ((e & hash[5]) ^ ((~e) & hash[6]))
-                + k[i]
-                + (w[i] = (i < 16) ? w[i] : (
-                    w[i - 16]
-                    + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
-                    + w[i - 7]
-                    + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
-                ) | 0
-            );
-            var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
-                + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-            hash = [(temp1 + temp2) | 0].concat(hash);
-            hash[4] = (hash[4] + temp1) | 0;
-        }
-
-        for (i = 0; i < 8; i++) {
-            hash[i] = (hash[i] + oldHash[i]) | 0;
-        }
-    }
-    
-    for (i = 0; i < 8; i++) {
-        for (j = 3; j >= 0; j--) {
-            var b = (hash[i] >> (j * 8)) & 255;
-            result += (b < 16 ? '0' : '') + b.toString(16);
-        }
-    }
-    return result;
-}
-
+// 🎵 SES
 function playSuccessSound() {
     try {
         const audio = new Audio('success.mp3');
         audio.currentTime = 0;
-        audio.play().catch(e => console.log("Ses hatası:", e));
-    } catch (e) {}
+        audio.play().catch(e => console.log("Ses oynatma hatası:", e));
+    } catch (e) {
+        console.log("Ses yükleme hatası:", e);
+    }
 }
 
+// GÜVENLİ STORAGE (sadece tema tercihi için kullanılıyor)
 function setSafeStorage(key, val) {
-    try {
-        localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
-    } catch(e) {}
+    try { localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val)); } catch (e) {}
 }
-
 function getSafeStorage(key) {
     try {
         const raw = localStorage.getItem(key);
         if (!raw) return null;
-        try { return JSON.parse(raw); } catch(e) { return raw; }
-    } catch(e) { return null; }
-}
-
-let users = getSafeStorage('1step_users') || {};
-let currentUser = getSafeStorage('1step_current_user') || null;
-let habits = [];
-
-function saveUsersToLocalStorage() {
-    setSafeStorage('1step_users', users);
-}
-
-function saveHabitsToLocalStorage() {
-    if (!currentUser) return;
-    if (!users[currentUser]) {
-        users[currentUser] = { passwordHash: '', habits: [] };
+        try { return JSON.parse(raw); } catch (e) { return raw; }
+    } catch (e) {
+        return null;
     }
-    users[currentUser].habits = habits;
-    saveUsersToLocalStorage();
 }
+
+let currentUser = null; // { uid, username }
+let habits = [];
 
 function showError(elementId, message) {
     const errorEl = document.getElementById(elementId);
     if (!errorEl) return;
     errorEl.innerText = message;
     errorEl.classList.remove('hidden');
-    setTimeout(() => errorEl.classList.add('hidden'), 3500);
+    setTimeout(() => { errorEl.classList.add('hidden'); }, 3500);
 }
 
-// TEMA
+// TEMA (DARK / LIGHT MODE)
 const themeToggleBtn = document.getElementById('themeToggle');
 let currentTheme = getSafeStorage('1step_theme') || 'dark';
 
@@ -169,8 +96,15 @@ function switchAuthTab(tab) {
     }
 }
 
-function handleLogin(e) {
-    if (e) try { e.preventDefault(); } catch(err) {}
+// Firebase Authentication e-posta ister; kullanıcı adını sahte bir e-postaya çeviriyoruz
+function usernameToEmail(username) {
+    return username.toLowerCase().replace(/[^a-z0-9]/g, '') + "@1step-users.app";
+}
+
+// 📌 GİRİŞ YAPMA İŞLEMİ
+async function handleLogin(e) {
+    if (e) { try { e.preventDefault(); } catch (err) {} }
+
     const uNameInput = (document.getElementById('loginUsername').value || '').trim();
     const uPassInput = document.getElementById('loginPassword').value;
 
@@ -179,35 +113,24 @@ function handleLogin(e) {
         return;
     }
 
-    const inputHash = sha256Sync(uPassInput);
+    const pseudoEmail = usernameToEmail(uNameInput);
 
-    if (uNameInput.toLowerCase() === ADMIN_USERNAME.toLowerCase() && inputHash === ADMIN_PASS_HASH) {
-        currentUser = ADMIN_USERNAME;
-        if (!users[ADMIN_USERNAME]) {
-            users[ADMIN_USERNAME] = { passwordHash: ADMIN_PASS_HASH, habits: [] };
-            saveUsersToLocalStorage();
-        }
-        setSafeStorage('1step_current_user', ADMIN_USERNAME);
+    try {
+        const cred = await auth.signInWithEmailAndPassword(pseudoEmail, uPassInput);
+        const docSnap = await db.collection('users').doc(cred.user.uid).get();
+        const data = docSnap.data() || {};
+        currentUser = { uid: cred.user.uid, username: data.username || uNameInput };
+        habits = data.habits || [];
         initUserSession();
-        return;
+    } catch (err) {
+        showError('loginError', 'Kullanıcı adı veya şifre hatalı!');
     }
-
-    const matchedUserKey = Object.keys(users).find(k => k.toLowerCase() === uNameInput.toLowerCase());
-    if (matchedUserKey) {
-        const storedPassHash = users[matchedUserKey].passwordHash;
-        if (storedPassHash === inputHash) {
-            currentUser = matchedUserKey;
-            setSafeStorage('1step_current_user', matchedUserKey);
-            initUserSession();
-            return;
-        }
-    }
-
-    showError('loginError', 'Kullanıcı adı veya şifre hatalı!');
 }
 
-function handleRegister(e) {
-    if (e) try { e.preventDefault(); } catch(err) {}
+// 📌 KAYIT OLMA İŞLEMİ
+async function handleRegister(e) {
+    if (e) { try { e.preventDefault(); } catch (err) {} }
+
     const uNameInput = (document.getElementById('regUsername').value || '').trim();
     const uPassInput = document.getElementById('regPassword').value;
 
@@ -215,32 +138,41 @@ function handleRegister(e) {
         showError('regError', 'Lütfen tüm alanları doldurun!');
         return;
     }
-
-    if (uNameInput.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
-        const inputHash = sha256Sync(uPassInput);
-        if (inputHash === ADMIN_PASS_HASH) {
-            currentUser = ADMIN_USERNAME;
-            setSafeStorage('1step_current_user', ADMIN_USERNAME);
-            initUserSession();
-            return;
-        } else {
-            showError('regError', "Bu kullanıcı adı Admin'e aittir!");
-            return;
-        }
-    }
-
-    const existingKey = Object.keys(users).find(k => k.toLowerCase() === uNameInput.toLowerCase());
-    if (existingKey) {
-        showError('regError', 'Bu kullanıcı adı zaten alınmış!');
+    if (uPassInput.length < 6) {
+        showError('regError', 'Şifre en az 6 karakter olmalı!');
         return;
     }
 
-    const passHash = sha256Sync(uPassInput);
-    users[uNameInput] = { passwordHash: passHash, habits: [] };
-    saveUsersToLocalStorage();
-    currentUser = uNameInput;
-    setSafeStorage('1step_current_user', uNameInput);
-    initUserSession();
+    const usernameLower = uNameInput.toLowerCase();
+    const pseudoEmail = usernameToEmail(uNameInput);
+
+    try {
+        const existing = await db.collection('users').where('usernameLower', '==', usernameLower).limit(1).get();
+        if (!existing.empty) {
+            showError('regError', 'Bu kullanıcı adı zaten alınmış!');
+            return;
+        }
+
+        const cred = await auth.createUserWithEmailAndPassword(pseudoEmail, uPassInput);
+        await db.collection('users').doc(cred.user.uid).set({
+            username: uNameInput,
+            usernameLower: usernameLower,
+            habits: []
+        });
+
+        currentUser = { uid: cred.user.uid, username: uNameInput };
+        habits = [];
+        initUserSession();
+    } catch (err) {
+        if (err.code === 'auth/email-already-in-use') {
+            showError('regError', 'Bu kullanıcı adı zaten alınmış!');
+        } else if (err.code === 'auth/weak-password') {
+            showError('regError', 'Şifre çok zayıf, en az 6 karakter olmalı!');
+        } else {
+            showError('regError', 'Kayıt sırasında bir hata oluştu.');
+            console.log(err);
+        }
+    }
 }
 
 function initUserSession() {
@@ -258,49 +190,77 @@ function initUserSession() {
     const userBadge = document.getElementById('userBadge');
     const adminBtn = document.getElementById('adminPanelBtn');
 
-    if (currentUser.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
-        userBadge.innerHTML = `<div class="badge-admin"><i class="fa-solid fa-crown crown-icon"></i> <span>Efe</span> <span class="badge-tag">FOUNDER & ADMIN</span></div>`;
+    if (currentUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+        userBadge.innerHTML = `<div class="badge-admin"><i class="fa-solid fa-crown crown-icon"></i> <span>${currentUser.username}</span> <span class="badge-tag">FOUNDER & ADMIN</span></div>`;
         adminBtn.classList.remove('hidden');
     } else {
-        userBadge.innerHTML = `<span class="badge-user">👤 ${currentUser}</span>`;
+        userBadge.innerHTML = `<span class="badge-user">👤 ${currentUser.username}</span>`;
         adminBtn.classList.add('hidden');
     }
 
-    habits = (users[currentUser] && users[currentUser].habits) ? users[currentUser].habits : [];
     renderHabits();
 }
 
 function logout() {
+    auth.signOut();
     currentUser = null;
-    try { localStorage.removeItem('1step_current_user'); } catch(e) {}
+    habits = [];
     initUserSession();
 }
 
-function openAdminModal() {
-    if (currentUser.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) return;
-    const modal = document.getElementById('adminModal');
-    const totalUsers = Object.keys(users).length;
-    let totalHabits = 0;
+// Oturum devamlılığı: Firebase sayfa yenilendiğinde otomatik kontrol eder
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        const docSnap = await db.collection('users').doc(user.uid).get();
+        const data = docSnap.data();
+        if (data) {
+            currentUser = { uid: user.uid, username: data.username };
+            habits = data.habits || [];
+        }
+    } else {
+        currentUser = null;
+        habits = [];
+    }
+    initUserSession();
+});
 
+async function saveHabitsToFirestore() {
+    if (!currentUser) return;
+    try {
+        await db.collection('users').doc(currentUser.uid).update({ habits });
+    } catch (e) {
+        console.log("Kaydetme hatası:", e);
+    }
+}
+
+async function openAdminModal() {
+    if (!currentUser || currentUser.username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) return;
+
+    const modal = document.getElementById('adminModal');
     const listContainer = document.getElementById('adminUsersList');
+    listContainer.innerHTML = "<p>Yükleniyor...</p>";
+    modal.classList.remove('hidden');
+
+    const snapshot = await db.collection('users').get();
+    let totalHabits = 0;
     listContainer.innerHTML = "";
 
-    Object.keys(users).forEach(u => {
-        const uHabits = users[u].habits ? users[u].habits.length : 0;
+    snapshot.forEach(doc => {
+        const u = doc.data();
+        const uHabits = u.habits ? u.habits.length : 0;
         totalHabits += uHabits;
 
         const row = document.createElement('div');
         row.className = 'admin-user-row';
         row.innerHTML = `
-            <span><strong>${u}</strong> ${u.toLowerCase() === ADMIN_USERNAME.toLowerCase() ? '(Admin)' : ''}</span>
+            <span><strong>${u.username}</strong> ${u.username.toLowerCase() === ADMIN_USERNAME.toLowerCase() ? '(Admin)' : ''}</span>
             <span>${uHabits} Alışkanlık</span>
         `;
         listContainer.appendChild(row);
     });
 
-    document.getElementById('adminTotalUsers').innerText = totalUsers;
+    document.getElementById('adminTotalUsers').innerText = snapshot.size;
     document.getElementById('adminTotalHabits').innerText = totalHabits;
-    modal.classList.remove('hidden');
 }
 
 function closeAdminModal() {
@@ -328,7 +288,7 @@ addBtn.addEventListener('click', () => {
     };
 
     habits.push(newHabit);
-    saveHabitsToLocalStorage();
+    saveHabitsToFirestore();
     habitInput.value = "";
     renderHabits();
 });
@@ -561,7 +521,7 @@ function toggleHabitDate(habitId, dateStr) {
         habit.completedDates.splice(dateIndex, 1);
     }
 
-    saveHabitsToLocalStorage();
+    saveHabitsToFirestore();
     renderHabits();
 }
 
@@ -572,7 +532,7 @@ function editHabit(habitId) {
     const newTitle = prompt("Alışkanlığın yeni ismini yazın:", habit.title);
     if (newTitle !== null && newTitle.trim() !== "") {
         habit.title = newTitle.trim();
-        saveHabitsToLocalStorage();
+        saveHabitsToFirestore();
         renderHabits();
     }
 }
@@ -580,9 +540,7 @@ function editHabit(habitId) {
 function deleteHabit(habitId) {
     if (confirm("Bu alışkanlığı silmek istediğine emin misin?")) {
         habits = habits.filter(h => h.id !== habitId);
-        saveHabitsToLocalStorage();
+        saveHabitsToFirestore();
         renderHabits();
     }
 }
-
-initUserSession();
