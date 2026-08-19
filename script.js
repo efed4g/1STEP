@@ -4,7 +4,7 @@ const habitsList = document.getElementById('habitsList');
 
 // 👑 EFE'YE ÖZEL ADMIN BİLGİLERİ
 const ADMIN_USERNAME = "Efehaei";
-const ADMIN_PASS_HASH = "d34c6ed01fea3982fe2459a77231aa5167d74731ec136d8c39da9607164caee3";
+const ADMIN_PASS_HASH = '1d56cbbce2487d53b27fe364c50e3d22ae62a948b4c170ccb76bf79f0f754b47';
 
 // 🛡️ SAF JAVASCRIPT SHA-256 (TÜM TELEFONLAR VE HTTP İLE %100 UYUMLU)
 function sha256Sync(ascii) {
