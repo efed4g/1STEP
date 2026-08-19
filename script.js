@@ -277,14 +277,18 @@ function handleRegister(e) {
     users[uNameInput] = { passwordHash: passHash, email: uEmailInput, habits: [] };
     saveUsersToLocalStorage();
 
-    // ☁️ FIREBASE BULUT SUNUCUSUNA KAYDET
+    // ☁️ FIREBASE AUTH (KİMLİK DOĞRULAMA) VE FIRESTORE BULUT KAYDI
+    if (firebaseAuth && uEmailInput && uEmailInput.includes('@')) {
+        firebaseAuth.createUserWithEmailAndPassword(uEmailInput, uPassInput).catch(err => console.log("Firebase Auth kaydı:", err));
+    }
+
     if (firebaseDb) {
         firebaseDb.collection('users').doc(uNameInput).set({
             username: uNameInput,
             email: uEmailInput,
             passwordHash: passHash,
             createdAt: new Date().toISOString()
-        }).catch(err => console.log("Bulut kayot hatası:", err));
+        }).catch(err => console.log("Bulut kayıt hatası:", err));
     }
 
     currentUser = uNameInput;
@@ -377,6 +381,17 @@ function initUserSession() {
     }
 
     habits = (users[currentUser] && users[currentUser].habits) ? users[currentUser].habits : [];
+
+    // ☁️ OTOMATİK BULUT SENKRONİZASYONU (Eski kullanıcıları ve verilerini Google Buluta taşır)
+    if (firebaseDb && currentUser && users[currentUser]) {
+        firebaseDb.collection('users').doc(currentUser).set({
+            username: currentUser,
+            email: users[currentUser].email || '',
+            passwordHash: users[currentUser].passwordHash || '',
+            habits: habits || []
+        }, { merge: true }).catch(err => console.log("Otomatik senkronizasyon:", err));
+    }
+
     renderHabits();
 }
 
