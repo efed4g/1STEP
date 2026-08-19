@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1STEP - Alışkanlık Takibi</title>
+
+    <!-- FontAwesome İkonlar & Google Fontlar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Dosyası -->
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+    <!-- Üst Başlık & Logo -->
+    <header class="animate-header">
+        <div class="header-top">
+            <div class="logo-container">
+                <img src="logo_transparent.png" alt="1STEP Logo" class="main-logo">
+            </div>
+            <!-- Tema Değiştirme Butonu -->
+            <button id="themeToggle" class="theme-toggle-btn" title="Temayı Değiştir">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </div>
+        <p class="slogan">Stepping forward, one step at a time.</p>
+    </header>
+
+    <!-- PROFIL VE ADMIN BARI -->
+    <div id="userBar" class="user-bar hidden">
+        <div id="userBadge" class="user-badge"></div>
+        <div class="user-bar-actions">
+            <button id="adminPanelBtn" class="btn-admin-panel hidden" onclick="openAdminModal()">
+                <i class="fa-solid fa-crown"></i> Admin Paneli
+            </button>
+            <button id="logoutBtn" class="btn-logout" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+            </button>
+        </div>
+    </div>
+
+    <!-- GİRİŞ / KAYIT KARTI -->
+    <div id="authSection" class="auth-section">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <button id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">Giriş Yap</button>
+                <button id="tabRegister" class="auth-tab" onclick="switchAuthTab('register')">Kayıt Ol</button>
+            </div>
+
+            <!-- Giriş Formu -->
+            <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                <input type="text" id="loginUsername" placeholder="Kullanıcı Adı">
+                <input type="password" id="loginPassword" placeholder="Şifre">
+                <button type="button" class="btn-auth" onclick="handleLogin(event)">Giriş Yap</button>
+                <div id="loginError" class="error-msg hidden"></div>
+            </form>
+
+            <!-- Kayıt Formu -->
+            <form id="registerForm" class="auth-form hidden" onsubmit="handleRegister(event)">
+                <input type="text" id="regUsername" placeholder="Kullanıcı Adı Seç">
+                <input type="password" id="regPassword" placeholder="Şifre Oluştur">
+                <button type="button" class="btn-auth" onclick="handleRegister(event)">Kayıt Ol</button>
+                <div id="regError" class="error-msg hidden"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ANA UYGULAMA ALANI -->
+    <div id="appContent" class="app-content hidden">
+        
+        <!-- 📊 İSTATİSTİK ÖZET PANELDİ -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <span class="stat-icon">🎯</span>
+                <div class="stat-info">
+                    <span id="statTotalHabits" class="stat-value">0</span>
+                    <span class="stat-title">Alışkanlık</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🔥</span>
+                <div class="stat-info">
+                    <span id="statBestStreak" class="stat-value">0 Gün</span>
+                    <span class="stat-title">Rekor Seri</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🏆</span>
+                <div class="stat-info">
+                    <span id="statTrophies" class="stat-value">0 Rozet</span>
+                    <span class="stat-title">Kazanılan Rozet</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALIŞKANLIK EKLEME FORMU -->
+        <section>
+            <input type="text" id="habitInput" placeholder="Yeni bir alışkanlık yaz... (Örn: 1 saat Kodlama)">
+            <button id="addBtn">Ekle</button>
+        </section>
+        <div id="habitError" class="error-msg habit-error hidden"></div>
+
+        <main id="habitsList">
+            <p class="empty-msg">Henüz alışkanlık eklenmedi.</p>
+        </main>
+    </div>
+
+    <!-- ADMIN PANELİ MODALI -->
+    <div id="adminModal" class="modal-backdrop hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>👑 Admin Yönetim Paneli</h3>
+                <button class="btn-close-modal" onclick="closeAdminModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-stats">
+                    <div class="stat-box">
+                        <span class="stat-num" id="adminTotalUsers">0</span>
+                        <span class="stat-label">Kayıtlı Kullanıcı</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num" id="adminTotalHabits">0</span>
+                        <span class="stat-label">Toplam Alışkanlık</span>
+                    </div>
+                </div>
+                <h4>Kullanıcı Listesi:</h4>
+                <div id="adminUsersList" class="admin-users-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KONFETİ KÜTÜPHANESİ (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js?v=2"></script>
+</body>
+</html>
