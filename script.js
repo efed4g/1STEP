@@ -18,10 +18,12 @@ const firebaseConfig = {
 };
 
 let firebaseAuth = null;
+let firebaseDb = null;
 if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY") {
     try {
         firebase.initializeApp(firebaseConfig);
         firebaseAuth = firebase.auth();
+        firebaseDb = firebase.firestore();
     } catch(e) {}
 }
 
@@ -274,6 +276,17 @@ function handleRegister(e) {
     const passHash = sha256Sync(uPassInput);
     users[uNameInput] = { passwordHash: passHash, email: uEmailInput, habits: [] };
     saveUsersToLocalStorage();
+
+    // ☁️ FIREBASE BULUT SUNUCUSUNA KAYDET
+    if (firebaseDb) {
+        firebaseDb.collection('users').doc(uNameInput).set({
+            username: uNameInput,
+            email: uEmailInput,
+            passwordHash: passHash,
+            createdAt: new Date().toISOString()
+        }).catch(err => console.log("Bulut kayot hatası:", err));
+    }
+
     currentUser = uNameInput;
     setSafeStorage('1step_current_user', uNameInput);
     initUserSession();
@@ -373,17 +386,14 @@ function logout() {
     initUserSession();
 }
 
-// 👑 ADMIN EFE'NİN KULLANICI ŞİFRE VE E-POSTA DÜZENLEME YETKİLERİ
-function openAdminModal() {
-    if (currentUser.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) return;
-    const modal = document.getElementById('adminModal');
-    const totalUsers = Object.keys(users).length;
-    let totalHabits = 0;
-
+function renderAdminListUI() {
     const listContainer = document.getElementById('adminUsersList');
+    if (!listContainer) return;
     listContainer.innerHTML = "";
+    let totalHabits = 0;
+    const userKeys = Object.keys(users);
 
-    Object.keys(users).forEach(u => {
+    userKeys.forEach(u => {
         const uHabits = users[u].habits ? users[u].habits.length : 0;
         const uEmail = users[u].email ? users[u].email : 'E-posta tanımlı değil';
         totalHabits += uHabits;
@@ -410,16 +420,51 @@ function openAdminModal() {
         listContainer.appendChild(row);
     });
 
-    document.getElementById('adminTotalUsers').innerText = totalUsers;
+    document.getElementById('adminTotalUsers').innerText = userKeys.length;
     document.getElementById('adminTotalHabits').innerText = totalHabits;
+}
+
+// 👑 ADMIN EFE'NİN BULUT DESTEKLİ KULLANICI YÖNETİMİ
+function openAdminModal() {
+    if (!currentUser || currentUser.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) return;
+    const modal = document.getElementById('adminModal');
+
+    renderAdminListUI();
     modal.classList.remove('hidden');
+
+    // ☁️ Google Cloud Firestore'dan TÜM kayıtlı kullanıcıları canlı çek ve ekrana bas
+    if (firebaseDb) {
+        firebaseDb.collection('users').get().then(snapshot => {
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data && data.username) {
+                    if (!users[data.username]) {
+                        users[data.username] = {
+                            passwordHash: data.passwordHash || '',
+                            email: data.email || '',
+                            habits: data.habits || []
+                        };
+                    } else {
+                        if (data.email) users[data.username].email = data.email;
+                        if (data.passwordHash) users[data.username].passwordHash = data.passwordHash;
+                    }
+                }
+            });
+            saveUsersToLocalStorage();
+            renderAdminListUI();
+        }).catch(err => console.log("Bulut kullanıcı çekme hatası:", err));
+    }
 }
 
 function adminResetUserPass(username) {
     const newPass = prompt(`${username} kullanıcısı için YENİ ŞİFRE belirleyin:`, "123456");
     if (newPass && newPass.trim() !== "") {
-        users[username].passwordHash = sha256Sync(newPass.trim());
+        const newHash = sha256Sync(newPass.trim());
+        users[username].passwordHash = newHash;
         saveUsersToLocalStorage();
+        if (firebaseDb) {
+            firebaseDb.collection('users').doc(username).update({ passwordHash: newHash }).catch(e=>{});
+        }
         alert(`${username} kullanıcısının şifresi '${newPass.trim()}' olarak yenilendi! 🔑`);
         openAdminModal();
     }
@@ -431,7 +476,10 @@ function adminEditUserEmail(username) {
     if (newEmail !== null && newEmail.trim() !== '') {
         users[username].email = newEmail.trim();
         saveUsersToLocalStorage();
-        alert(`${username} kullanıcısının e-postası '${newEmail.trim()}' olarak güncellendi! ✉️`);
+        if (firebaseDb) {
+            firebaseDb.collection('users').doc(username).update({ email: newEmail.trim() }).catch(e=>{});
+        }
+        alert(`${username} kullanıcısının e-postası '${newEmail.trim()}' mevcuttur ve güncellendi! ✉️`);
         openAdminModal();
     }
 }
