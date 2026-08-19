@@ -6,14 +6,15 @@ const habitsList = document.getElementById('habitsList');
 const ADMIN_USERNAME = "Efehaei";
 const ADMIN_PASS_HASH = "d34c6ed01fea3982fe2459a77231aa5167d74731ec136d8c39da9607164caee3";
 
-// FIREBASE YAPILANDIRMASI
+// FIREBASE YAPILANDIRMASI (EFE'NİN GERÇEK PROJESİ)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "1step.firebaseapp.com",
-    projectId: "1step",
-    storageBucket: "1step.appspot.com",
-    messagingSenderId: "123456",
-    appId: "1:123456"
+  apiKey: "AIzaSyDWCo4uxYnBzZE2GrySIyPpG01yvts9AyQ",
+  authDomain: "step-35a2b.firebaseapp.com",
+  projectId: "step-35a2b",
+  storageBucket: "step-35a2b.firebasestorage.app",
+  messagingSenderId: "759360554165",
+  appId: "1:759360554165:web:cb4ff313d75e43b97d6afc",
+  measurementId: "G-Y1HTMZMJBZ"
 };
 
 let firebaseAuth = null;
