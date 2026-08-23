@@ -375,3 +375,46 @@ body.light-mode .error-msg {
     background: rgba(220, 38, 38, 0.08);
     border-color: rgba(220, 38, 38, 0.25);
 }
+/* MOBİL EKRAN UYUMLULUĞU (RESPONSIVE FIX) */
+@media (max-width: 600px) {
+    body {
+        padding: 0 12px;
+        margin: 15px auto;
+    }
+
+    /* Başlığı ve Butonları Mobilde Alt Alta Alır (Taşmayı Tamamen Önler) */
+    .habit-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .habit-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .habit-info h3 {
+        word-break: break-word;
+    }
+
+    /* Üst Profil Barını Mobilde Düzenler */
+    .user-bar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .user-bar-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    /* İstatistik Kartlarını Mobilde Düzgün Sıralar */
+    .stats-overview {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
