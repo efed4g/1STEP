@@ -306,19 +306,72 @@ button {
 .admin-user-row { display: flex; justify-content: space-between; padding: 10px; background: #161b22; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
 
 /* LIGHT MODE SUPPORT */
-body.light-mode { background: #f1f5f9; color: #0f172a; }
+body.light-mode { 
+    background: #f8fafc; 
+    color: #0f172a;
+    background-image: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.12) 0%, transparent 60%);
+}
+
+/* Kutucuklar (Kartlar, Paneller ve Girdiler) */
 body.light-mode .user-bar,
 body.light-mode .auth-card,
 body.light-mode .modal-card,
 body.light-mode .habit-card,
+body.light-mode .stat-card,
 body.light-mode .grid-container,
+body.light-mode .stat-box,
+body.light-mode .admin-user-row,
 body.light-mode input {
     background: #ffffff;
     border-color: #e2e8f0;
     color: #0f172a;
 }
+
+/* Logo Düzenlemesi (Beyaz logo yazılarını açık temada netleştirir) */
+body.light-mode .main-logo {
+    filter: brightness(0.15) drop-shadow(0 4px 12px rgba(16, 185, 129, 0.35));
+}
+
+/* Tema Değiştirme Butonu */
+body.light-mode .theme-toggle-btn {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+/* Alışkanlık Başlıkları & Admin İsmi */
+body.light-mode .habit-info h3,
+body.light-mode .badge-admin {
+    color: #0f172a;
+}
+
+/* Boş Alışkanlık Kutucukları (Level 0 Grid) */
+body.light-mode .legend-box.level-0, 
+body.light-mode .grid-square.level-0 {
+    background-color: #ebedf0;
+    border: 1px solid #e1e4e8;
+}
+
+/* Buton Düzenlemeleri */
+body.light-mode .btn-check:not(.completed) {
+    background-color: #f1f5f9;
+    color: #16a34a;
+    border-color: #16a34a;
+}
+
+body.light-mode .btn-edit,
+body.light-mode .btn-delete,
+body.light-mode .btn-logout {
+    border-color: #cbd5e1;
+    color: #64748b;
+}
+
+/* Hata Mesajı */
 body.light-mode .error-msg {
     color: #dc2626;
+    background: rgba(220, 38, 38, 0.08);
+    border-color: rgba(220, 38, 38, 0.25);
+}
     background: rgba(220, 38, 38, 0.08);
     border-color: rgba(220, 38, 38, 0.25);
 }
